@@ -1,0 +1,201 @@
+<html>
+<head>
+<title>Alkoholpegel berechnen</title>
+<meta name="description" content="Webapp um den Alkoholpegel zu berechnen">
+<meta name="author" content="Yannik Eichel">
+<meta name="keywords" content="Alkohol, Pegel, Promille, Alkoholpegel, berchnen">
+<meta name="language" content="de" />
+<meta name="viewport" content="width=400" />
+</head>
+<body onload="load()">
+<center>
+<form name="alk" action="" method="GET">
+<table><tr><td>
+Auswählen:</td><td><SELECT size="1" id="alkcombo" onchange="changecombo()">
+ <option value="none" selected>-----</option>
+ <option value="pussybier33">Mischbier 0,33L</option>
+ <option value="bier33">Bier 0,33L</option>
+ <option value="bier5">Bier 0,5L</option>
+ <option value="korn">Korn 0,04L</option>
+ <option value="jaegerm">Jägermeister 0,02L</option>
+ <option value="wein">Wein 0,3L</option>
+ <option value="weinbrand">Weinbrand 0,04L</option>
+ <option value="sekt">Sekt 0,1L</option>
+ <option value="tequila">Tequila 0,02L</option>
+</SELECT></td></tr>
+<tr><td>oder direkt eingeben:<br></td></tr>
+<tr><td>Menge(ML):</td><td><input type="number" name="volumen" id="volumen" value="40" onchange="setCookie(this.id, this.value, 365);"></td></tr>
+<tr><td>Volumenprozent(Vol%):</td><td><input type="number" step="any" name="prozent" id="prozent" value="32" onchange="setCookie(this.id, this.value, 365);"></td></tr>
+<tr><td><input type="button" name="button" value="Hinzufügen" onClick="calcalk(this.form)"></td></tr></table><hr width="390">
+
+<div id="pegeldiv" style="font-size: 175%;"></div><small>Zuletzt aktualisiert:<div id="zeitl"> </div></small><hr width="390">
+<div id="verlauf"></div>
+<hr width="390"><br>
+
+<table><tr><td>Einstellungen zur Person:</td></tr>
+<tr><td>Geschlecht:</td><td><SELECT size="1" name="geschlecht" id="geschlecht" onchange="setCookie(this.id, this.value, 365);">
+ <option value="male" selected>m&auml;nnlich</option>
+ <option value="female">weiblich</option>
+</SELECT></td></tr>
+<tr><td>K&ouml;rpergewicht(kg):</td><td><input type="number" name="gewicht" id="gewicht" onchange="setCookie(this.id, this.value, 365);"></td></tr>
+<tr><td>K&ouml;rperl&auml;nge(cm):</td><td><input type="number" name="groesse" id="groesse" onchange="setCookie(this.id, this.value, 365);"></td></tr>
+</table><small>Wird automatisch gespeichert.</small>
+<br><br><hr width="350">
+<!--<input type="button" name="button" value="-1 Stunde" onClick="removetime()">--><input type="button" name="button" value="Reset" onClick="resetter()">
+<small>Dadurch wirst DU nicht nüchtern :P</small>
+</form>
+</center>
+<script type="text/javascript">
+var pegel = getCookie("pegel");
+if (pegel == "") {
+	pegel = 0;
+}
+var timestamp = getCookie("zeit");
+if (timestamp == "" || timestamp == 0) {//falls zeit nicht gesetzt
+	timestamp = Math.round(+new Date()/1000);
+}
+var div = document.getElementById("pegeldiv");
+var divzeit = document.getElementById("zeitl");
+var divverl = document.getElementById("verlauf");
+var alkcombo = document.getElementById('alkcombo');
+var txtvol = document.getElementById('volumen');
+var txtpro = document.getElementById('prozent');
+function load() {
+	var alkcombo = getCookie("alkcombo"); 
+	if (alkcombo == "") { document.getElementById("alkcombo").value = "none"; }else{ document.getElementById("alkcombo").value = alkcombo; }
+	var volumen = getCookie("volumen");
+	if (volumen == "") { document.getElementById("volumen").value = "40"; }else{ document.getElementById("volumen").value = volumen; }
+	var prozent = getCookie("prozent");
+	if (prozent == "") { document.getElementById("prozent").value = "32"; }else{ document.getElementById("prozent").value = prozent; }
+	var geschlecht = getCookie("geschlecht");
+	if (geschlecht == "") { document.getElementById("geschlecht").value = "male"; }else{ document.getElementById("geschlecht").value = geschlecht; }
+	var gewicht = getCookie("gewicht");
+	if (gewicht == "") { document.getElementById("gewicht").value = 64; }else{ document.getElementById("gewicht").value = gewicht; }
+	var groesse = getCookie("groesse");
+	if (groesse == "") { document.getElementById("groesse").value = 178; }else{ document.getElementById("groesse").value = groesse; }
+	divverl.innerHTML = getCookie("verlauf");
+	calcpegel();
+}
+function calcpegel() {
+	var timestampnew = Math.round(+new Date()/1000);
+	var zeit = timestampnew - timestamp; //vergangene zeit in sekunden
+	timestamp = timestampnew;
+	var abbaustunde = 0.15;//abbau pro stunde = 0,15promille
+	var abbau = zeit*(abbaustunde/60/60); 
+	if (pegel <= abbau) {//wenn pegel geringer als der abgebaute wert
+		pegel = 0;
+	}else{
+		pegel -= abbau;
+	}
+	setCookie("pegel", pegel, 365);
+	setCookie("zeit", timestamp, 365);
+	if (pegel > 0) {
+		var nuechternin = Math.round((pegel/abbaustunde)*10)/10;
+		div.innerHTML = "<p><b>"+Math.round(pegel * 100) / 100+"‰</b><br>N&uuml;chtern in "+nuechternin+" Stunden</p>";
+	}else
+	{
+		div.innerHTML = "<p><b>0‰</b><br>N&uuml;chtern in 0 Stunden</p>";
+	}
+	divzeit.innerHTML = realtime();
+}
+function realtime() {
+	var date = new Date(timestamp * 1000);
+	var minutes = "0" + date.getMinutes();
+	var seconds = "0" + date.getSeconds();
+	return date.getHours() + ':' + minutes.substr(minutes.length-2) + ':' + seconds.substr(seconds.length-2);
+}
+function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+d.toUTCString();
+    document.cookie = cname + "=" + cvalue + "; " + expires;
+}
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1);
+        if (c.indexOf(name) != -1) return c.substring(name.length,c.length);
+    }
+    return "";
+}
+window.setInterval(function () {calcpegel()}, 60000);
+function changecombo() {
+	switch(alkcombo.options[alkcombo.selectedIndex].value) {
+		case "pussybier33":
+			txtvol.value = 330;
+			txtpro.value = 2.5;
+			break;
+		case "bier33":
+			txtvol.value = 330;
+			txtpro.value = 5;
+			break;
+		case "bier5":
+			txtvol.value = 500;
+			txtpro.value = 5;
+			break;
+		case "korn":
+			txtvol.value = 40;
+			txtpro.value = 32;
+			break;
+		case "jaegerm":
+			txtvol.value = 20;
+			txtpro.value = 35;
+			break;
+		case "wein":
+			txtvol.value = 300;
+			txtpro.value = 10;
+			break;
+		case "weinbrand":
+			txtvol.value = 40;
+			txtpro.value = 38;
+			break;
+		case "sekt":
+			txtvol.value = 100;
+			txtpro.value = 12;
+			break;
+		case "tequila":
+			txtvol.value = 20;
+			txtpro.value = 38;
+			break;
+		default:
+			txtvol.value = 0;
+			txtpro.value = 5;
+	}
+	setCookie("alkcombo", document.getElementById("alkcombo").value, 365);
+	setCookie("prozent", document.getElementById("prozent").value, 365);
+	setCookie("volumen", document.getElementById("volumen").value, 365);
+}
+function removetime() {
+	timestamp -= 3600;
+	calcpegel();
+}
+function resetter() {
+	pegel = 0;
+	setCookie("pegel", pegel, 365);
+	divverl.innerHTML = "";
+	setCookie("verlauf", "", 365);
+	calcpegel();
+}
+function calcalk(form) { //berechnen alkohol wert
+    var geschlecht = form.geschlecht.value;
+    var gewicht = form.gewicht.value;
+    var groesse = form.groesse.value;
+    var volumen = form.volumen.value;
+    var volprozent = form.prozent.value;
+	if (geschlecht == "male") {
+		var r = (0.31608-(0.004821*gewicht))+(0.004432*groesse);
+	} else {
+		var r = (0.31233-(0.006446*gewicht))+(0.004466*groesse);
+	}
+	var alkohol = volumen*(volprozent/100)*0.8; // g/ml  ergibt gramm alkohol
+	var bak = alkohol/(gewicht*r); //blut alkohol wert
+	var drink = alkcombo.options[alkcombo.selectedIndex].text
+	divverl.innerHTML =  realtime() + ": " + drink.substr(0, drink.indexOf(" ")) + " " + volumen + "ML mit " + volprozent +"Vol.% (" + Math.round(alkohol) + " ML Alkohol)<br>" + divverl.innerHTML;
+	setCookie("verlauf", divverl.innerHTML, 365);
+	pegel += bak;
+	calcpegel();
+}
+</script>
+</body></html>
