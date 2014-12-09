@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+    <widget xmlns   = "http://www.w3.org/ns/widgets"
+        xmlns:gap   = "http://phonegap.com/ns/1.0"
+        id          = "de.yannik995.AlkoholRechner"
+        versionCode = "10" 
+        version     = "1.0.0" >
+
+    <!-- versionCode is optional and Android only -->
+
+    <name>Alkohol Rechner</name>
+
+    <description>
+        Ein auf HTML und Javascript basierender Alkohol Rechner
+    </description>
+
+    <author href="http://yannikeichel.de/alkohol/" email="alkohol@yannikeichel.de">
+        Yannik Eichek
+    </author>
+
+</widget>
