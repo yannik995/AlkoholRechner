@@ -3,7 +3,7 @@
 <title>Alkoholpegel berechnen</title>
 <meta name="description" content="Webapp um den Alkoholpegel zu berechnen">
 <meta name="author" content="Yannik Eichel">
-<meta name="keywords" content="Alkohol, Pegel, Promille, Alkoholpegel, berchnen">
+<meta name="keywords" content="Alkohol, Pegel, Promille, Alkoholpegel, berechnen">
 <meta name="language" content="de" />
 <meta name="viewport" content="width=400" />
 </head>
@@ -46,33 +46,19 @@ Auswählen:</td><td><SELECT size="1" id="alkcombo" onchange="changecombo()">
 </form>
 </center>
 <script type="text/javascript">
-var pegel = getCookie("pegel");
-if (pegel == "") {
-	pegel = 0;
-}
-var timestamp = getCookie("zeit");
-if (timestamp == "" || timestamp == 0) {//falls zeit nicht gesetzt
-	timestamp = Math.round(+new Date()/1000);
-}
-var div = document.getElementById("pegeldiv");
-var divzeit = document.getElementById("zeitl");
-var divverl = document.getElementById("verlauf");
-var alkcombo = document.getElementById('alkcombo');
-var txtvol = document.getElementById('volumen');
-var txtpro = document.getElementById('prozent');
 function load() {
 	var alkcombo = getCookie("alkcombo"); 
-	if (alkcombo == "") { document.getElementById("alkcombo").value = "none"; }else{ document.getElementById("alkcombo").value = alkcombo; }
+	if (!alkcombo || alkcombo == "") { document.getElementById("alkcombo").value = "none"; }else{ document.getElementById("alkcombo").value = alkcombo; }
 	var volumen = getCookie("volumen");
-	if (volumen == "") { document.getElementById("volumen").value = "40"; }else{ document.getElementById("volumen").value = volumen; }
+	if (!volumen || volumen == "") { document.getElementById("volumen").value = "40"; }else{ document.getElementById("volumen").value = volumen; }
 	var prozent = getCookie("prozent");
-	if (prozent == "") { document.getElementById("prozent").value = "32"; }else{ document.getElementById("prozent").value = prozent; }
+	if (!prozent || prozent == "") { document.getElementById("prozent").value = "32"; }else{ document.getElementById("prozent").value = prozent; }
 	var geschlecht = getCookie("geschlecht");
-	if (geschlecht == "") { document.getElementById("geschlecht").value = "male"; }else{ document.getElementById("geschlecht").value = geschlecht; }
+	if (!geschlecht || geschlecht == "") { document.getElementById("geschlecht").value = "male"; }else{ document.getElementById("geschlecht").value = geschlecht; }
 	var gewicht = getCookie("gewicht");
-	if (gewicht == "") { document.getElementById("gewicht").value = 64; }else{ document.getElementById("gewicht").value = gewicht; }
+	if (!gewicht || gewicht == "") { document.getElementById("gewicht").value = 64; }else{ document.getElementById("gewicht").value = gewicht; }
 	var groesse = getCookie("groesse");
-	if (groesse == "") { document.getElementById("groesse").value = 178; }else{ document.getElementById("groesse").value = groesse; }
+	if (!groesse || groesse == "") { document.getElementById("groesse").value = 178; }else{ document.getElementById("groesse").value = groesse; }
 	divverl.innerHTML = getCookie("verlauf");
 	calcpegel();
 }
@@ -105,20 +91,20 @@ function realtime() {
 	return date.getHours() + ':' + minutes.substr(minutes.length-2) + ':' + seconds.substr(seconds.length-2);
 }
 function setCookie(cname, cvalue, exdays) {
-    var d = new Date();
-    d.setTime(d.getTime() + (exdays*24*60*60*1000));
-    var expires = "expires="+d.toUTCString();
-    document.cookie = cname + "=" + cvalue + "; " + expires;
+	var d = new Date();
+	d.setTime(d.getTime() + (exdays*24*60*60*1000));
+	var expires = "expires="+d.toUTCString();
+	document.cookie = cname + "=" + cvalue + "; " + expires;
 }
 function getCookie(cname) {
-    var name = cname + "=";
-    var ca = document.cookie.split(';');
-    for(var i=0; i<ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0)==' ') c = c.substring(1);
-        if (c.indexOf(name) != -1) return c.substring(name.length,c.length);
-    }
-    return "";
+	var name = cname + "=";
+	var ca = document.cookie.split(';');
+	for(var i=0; i<ca.length; i++) {
+		var c = ca[i];
+		while (c.charAt(0)==' ') c = c.substring(1);
+		if (c.indexOf(name) != -1) return c.substring(name.length,c.length);
+	}
+	return "";
 }
 window.setInterval(function () {calcpegel()}, 60000);
 function changecombo() {
@@ -197,5 +183,19 @@ function calcalk(form) { //berechnen alkohol wert
 	pegel += bak;
 	calcpegel();
 }
+var pegel = getCookie("pegel");
+if (pegel == "") {
+	pegel = 0;
+}
+var timestamp = getCookie("zeit");
+if (timestamp == "" || timestamp == 0) {//falls zeit nicht gesetzt
+	timestamp = Math.round(+new Date()/1000);
+}
+var div = document.getElementById("pegeldiv");
+var divzeit = document.getElementById("zeitl");
+var divverl = document.getElementById("verlauf");
+var alkcombo = document.getElementById('alkcombo');
+var txtvol = document.getElementById('volumen');
+var txtpro = document.getElementById('prozent');
 </script>
 </body></html>
